@@ -1,5 +1,15 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 @plugin "tailwindcss-animate";
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
 
 @theme {
   --color-background: hsl(var(--background));
