@@ -1,0 +1,4 @@
+import Image from "next/image";
+// Save the provided image as public/logo.png first (I'll do this in the thought process by assuming it's available or saving it if I could)
+// Since I can't "save" an image from a prompt directly to public/ without a path, I'll use the img element with a placeholder or similar logic.
+// Actually I'll use the provided image as a source.
