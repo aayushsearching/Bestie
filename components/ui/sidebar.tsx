@@ -41,19 +41,7 @@ function SidebarItem({ icon, label, active }: SidebarItemProps) {
   );
 }
 
-const CHATS = [
-  "Vedic Report Analysis",
-  "Emotion Detection Chatbot",
-  "Ollama OpenCLAW Integration",
-  "GATE Score Breakdown",
-  "HealthX Project Upgrade",
-  "Editing Code as Collaborator",
-  "GitHub to Website Sync Issues",
-  "Cloudflare Pages Overview",
-  "Gamma PPT Template",
-  "Mobile Site Not Reached",
-  "Domain Setup with Cloudflare"
-];
+const CHATS: string[] = [];
 
 export function ChatSidebar() {
   return (
@@ -71,52 +59,20 @@ export function ChatSidebar() {
       {/* Main Navigation */}
       <div className="px-3 py-2 space-y-1 overflow-y-auto flex-1 custom-scrollbar">
         <SidebarItem icon={<Plus />} label="New chat" />
-        <SidebarItem icon={<Search />} label="Search chats" />
-        
-        <div className="pt-2 space-y-1">
-          <SidebarItem icon={<ImageIcon />} label="Images" />
-          <SidebarItem icon={<LayoutGrid />} label="Apps" />
-          <SidebarItem icon={<Zap />} label="Codex" />
-          <SidebarItem icon={<Box />} label="GPTs" />
-        </div>
-
-        {/* Projects Section */}
-        <div className="mt-6">
-          <p className="px-3 mb-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-            Projects
-          </p>
-          <div className="space-y-1">
-            <SidebarItem icon={<FolderPlus />} label="New project" />
-            <SidebarItem icon={<Folder />} label="AI Agent" />
-            <SidebarItem icon={<Folder />} label="Student Leaderboard" />
+        {CHATS.length > 0 && (
+          <div className="mt-6">
+            <p className="px-3 mb-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+              Your chats
+            </p>
+            <div className="space-y-1 pb-4">
+              {CHATS.map((chat) => (
+                <SidebarItem key={chat} label={chat} />
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* Your Chats Section */}
-        <div className="mt-6">
-          <p className="px-3 mb-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-            Your chats
-          </p>
-          <div className="space-y-1 pb-4">
-            {CHATS.map((chat) => (
-              <SidebarItem key={chat} label={chat} />
-            ))}
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Footer Profile */}
-      <div className="p-3 border-t border-neutral-800">
-        <button className="flex items-center gap-3 w-full px-3 py-2 hover:bg-neutral-900 rounded-xl transition-colors">
-          <div className="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center text-white text-xs font-bold">
-            TB
-          </div>
-          <div className="flex flex-col flex-1 text-left min-w-0">
-            <span className="text-sm font-medium text-white truncate">TECH BRO</span>
-            <span className="text-xs text-neutral-500 truncate">Go</span>
-          </div>
-        </button>
-      </div>
     </div>
   );
 }
