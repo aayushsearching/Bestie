@@ -72,10 +72,19 @@ function useAutoResizeTextarea({
 
 export function VercelV0Chat() {
     const [value, setValue] = useState("");
+    const [placeholder, setPlaceholder] = useState("Ask v0 a question...");
     const { textareaRef, adjustHeight } = useAutoResizeTextarea({
         minHeight: 60,
         maxHeight: 200,
     });
+
+    const handleButtonClick = (msg: string) => {
+        setValue(msg);
+        setPlaceholder("Heyaaa");
+        textareaRef.current?.focus();
+        // Use a timeout to ensure dimensions are updated after state change
+        setTimeout(() => adjustHeight(), 0);
+    };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -104,7 +113,7 @@ export function VercelV0Chat() {
                                 adjustHeight();
                             }}
                             onKeyDown={handleKeyDown}
-                            placeholder="Ask v0 a question..."
+                            placeholder={placeholder}
                             className={cn(
                                 "w-full px-4 py-3",
                                 "resize-none",
@@ -169,18 +178,22 @@ export function VercelV0Chat() {
                     <ActionButton
                         icon={<CircleHelp className="w-4 h-4" />}
                         label="Confused"
+                        onClick={() => handleButtonClick("I am feeling bit confused")}
                     />
                     <ActionButton
                         icon={<Smile className="w-4 h-4" />}
                         label="Happy"
+                        onClick={() => handleButtonClick("I am very happy right now yaaaay !")}
                     />
                     <ActionButton
                         icon={<Heart className="w-4 h-4" />}
                         label="Emotional"
+                        onClick={() => handleButtonClick("I am feeling very emotional")}
                     />
                     <ActionButton
                         icon={<Frown className="w-4 h-4" />}
                         label="Want to cry"
+                        onClick={() => handleButtonClick("I want to cry aaaaah")}
                     />
                 </div>
             </div>
@@ -191,12 +204,14 @@ export function VercelV0Chat() {
 interface ActionButtonProps {
     icon: React.ReactNode;
     label: string;
+    onClick?: () => void;
 }
 
-function ActionButton({ icon, label }: ActionButtonProps) {
+function ActionButton({ icon, label, onClick }: ActionButtonProps) {
     return (
         <button
             type="button"
+            onClick={onClick}
             className="flex items-center gap-2 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 rounded-full border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
         >
             {icon}
