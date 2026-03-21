@@ -5,11 +5,10 @@ import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import {
-    ImageIcon,
-    FileUp,
-    Figma,
-    MonitorIcon,
-    CircleUserRound,
+    CircleHelp,
+    Smile,
+    Heart,
+    Frown,
     ArrowUpIcon,
     Paperclip,
     PlusIcon,
@@ -91,7 +90,7 @@ export function VercelV0Chat() {
     return (
         <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8">
             <h1 className="text-4xl font-bold text-black dark:text-white">
-                What can I help you ship?
+                How are you feeling today !
             </h1>
 
             <div className="w-full">
@@ -168,24 +167,20 @@ export function VercelV0Chat() {
 
                 <div className="flex items-center justify-center gap-3 mt-4">
                     <ActionButton
-                        icon={<ImageIcon className="w-4 h-4" />}
-                        label="Clone a Screenshot"
+                        icon={<CircleHelp className="w-4 h-4" />}
+                        label="Confused"
                     />
                     <ActionButton
-                        icon={<Figma className="w-4 h-4" />}
-                        label="Import from Figma"
+                        icon={<Smile className="w-4 h-4" />}
+                        label="Happy"
                     />
                     <ActionButton
-                        icon={<FileUp className="w-4 h-4" />}
-                        label="Upload a Project"
+                        icon={<Heart className="w-4 h-4" />}
+                        label="Emotional"
                     />
                     <ActionButton
-                        icon={<MonitorIcon className="w-4 h-4" />}
-                        label="Landing Page"
-                    />
-                    <ActionButton
-                        icon={<CircleUserRound className="w-4 h-4" />}
-                        label="Sign Up Form"
+                        icon={<Frown className="w-4 h-4" />}
+                        label="Want to cry"
                     />
                 </div>
             </div>
