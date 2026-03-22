@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'V0 Chat Demo',
-  description: 'Integrating an existing React component',
+  title: 'Raghav',
+  description: 'A premium, minimal AI chat interface.',
 }
 
 export default function RootLayout({
