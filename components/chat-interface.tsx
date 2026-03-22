@@ -136,8 +136,8 @@ export function ChatInterface() {
                  </div>
             </div>
 
-            {/* Message Area */}
-            <div className="flex-1 overflow-hidden">
+            {/* Message Area with Translucent Background */}
+            <div className="flex-1 overflow-hidden relative mx-4 my-2 rounded-3xl bg-neutral-900/40 backdrop-blur-xl border border-neutral-800/50 shadow-2xl">
                 <ChatMessageList smooth>
                     {messages.map((msg) => (
                         <div key={msg.id} className={cn(
