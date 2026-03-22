@@ -24,11 +24,13 @@ interface SidebarItemProps {
   label: string;
   active?: boolean;
   isCollapsed: boolean;
+  onClick?: () => void;
 }
 
-function SidebarItem({ icon, label, active, isCollapsed }: SidebarItemProps) {
+function SidebarItem({ icon, label, active, isCollapsed, onClick }: SidebarItemProps) {
   return (
     <button
+      onClick={onClick}
       className={cn(
         "flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-all duration-200",
         active 
@@ -49,9 +51,10 @@ const CHATS: string[] = [];
 interface ChatSidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
+  onNewChat?: () => void;
 }
 
-export function ChatSidebar({ isCollapsed, onToggle }: ChatSidebarProps) {
+export function ChatSidebar({ isCollapsed, onToggle, onNewChat }: ChatSidebarProps) {
   return (
     <div className={cn(
       "flex flex-col h-screen bg-[#0d0d0d] border-r border-neutral-800 transition-all duration-300 overflow-hidden",
@@ -81,7 +84,7 @@ export function ChatSidebar({ isCollapsed, onToggle }: ChatSidebarProps) {
 
       {/* Main Navigation */}
       <div className={cn("px-2 py-2 space-y-1 overflow-y-auto flex-1 custom-scrollbar", isCollapsed && "items-center")}>
-        <SidebarItem isCollapsed={isCollapsed} icon={<SquarePen className="w-5 h-5" />} label="New chat" />
+        <SidebarItem isCollapsed={isCollapsed} icon={<SquarePen className="w-5 h-5" />} label="New chat" onClick={onNewChat} />
 
         {/* Your Chats Section */}
         <div className="mt-6">
