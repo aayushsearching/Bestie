@@ -31,38 +31,52 @@ interface Message {
   content: string;
 }
 
-export function ChatInterface({ onFirstMessage }: { onFirstMessage?: (text: string) => void }) {
-  const [messages, setMessages] = useState<Message[]>([]);
+export function ChatInterface({ 
+  initialMessages = [], 
+  onMessagesUpdate 
+}: { 
+  initialMessages?: Message[],
+  onMessagesUpdate?: (messages: Message[]) => void 
+}) {
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
   const isLanding = messages.length === 0;
+
+  // Sync with prop changes
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
+
+  const updateMessages = (newMsgs: Message[]) => {
+    setMessages(newMsgs);
+    onMessagesUpdate?.(newMsgs);
+  };
 
   const handleSend = (text?: string) => {
     const messageText = text || input;
     if (!messageText.trim()) return;
-
-    if (messages.length === 0) {
-      onFirstMessage?.(messageText);
-    }
 
     const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
       content: messageText,
     };
-
-    setMessages((prev) => [...prev, userMsg]);
+    
+    const nextMsgs = [...messages, userMsg];
+    updateMessages(nextMsgs);
     setInput("");
     setIsLoading(true);
 
-    // AI Simulation
+    // Mock AI Response
     setTimeout(() => {
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "I'm Bestie's AI assistant. I've switched to the chat view as you requested. The input is now at the bottom, just like ChatGPT!",
       };
-      setMessages((prev) => [...prev, aiMsg]);
+      updateMessages([...nextMsgs, aiMsg]);
       setIsLoading(false);
     }, 1000);
   };

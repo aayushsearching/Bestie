@@ -55,10 +55,19 @@ interface ChatSidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
   onNewChat?: () => void;
+  onSelectChat?: (id: string) => void;
   chats?: ChatHistory[];
+  activeChatId?: string;
 }
 
-export function ChatSidebar({ isCollapsed, onToggle, onNewChat, chats = [] }: ChatSidebarProps) {
+export function ChatSidebar({ 
+  isCollapsed, 
+  onToggle, 
+  onNewChat, 
+  onSelectChat, 
+  chats = [], 
+  activeChatId 
+}: ChatSidebarProps) {
   return (
     <div className={cn(
       "flex flex-col h-screen bg-[#0d0d0d] border-r border-neutral-800 transition-all duration-300 overflow-hidden",
@@ -108,6 +117,8 @@ export function ChatSidebar({ isCollapsed, onToggle, onNewChat, chats = [] }: Ch
                 key={chat.id} 
                 isCollapsed={isCollapsed} 
                 label={chat.title} 
+                active={chat.id === activeChatId}
+                onClick={() => onSelectChat?.(chat.id)}
                 icon={isCollapsed ? <MessageSquare className="w-5 h-5" /> : null} 
               />
             ))}
