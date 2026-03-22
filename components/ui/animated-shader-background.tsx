@@ -48,6 +48,10 @@ const StarryBackground = () => {
 
         void main() {
           vec2 uv = (gl_FragCoord.xy - 0.5 * iResolution.xy) / min(iResolution.y, iResolution.x);
+          
+          // Slow, intentional drift to the right
+          uv.x -= iTime * 0.02;
+          
           vec3 finalColor = vec3(0.0);
           
           for(float i = 0.0; i < 4.0; i++) {
