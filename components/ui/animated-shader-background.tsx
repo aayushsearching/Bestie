@@ -2,34 +2,34 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const StarryBackground = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showStars, setShowStars] = useState(false);
+  const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowStars(true), 4500);
+    const timer = setTimeout(() => setOpacity(1), 4500);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    if (!showStars) return;
-    
     const container = containerRef.current;
     if (!container) return;
 
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    
+    const { width, height } = container.getBoundingClientRect();
+    renderer.setSize(width || window.innerWidth, height || window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.0));
+    renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
 
     const material = new THREE.ShaderMaterial({
       uniforms: {
         iTime: { value: 0 },
-        iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+        iResolution: { value: new THREE.Vector2(width || window.innerWidth, height || window.innerHeight) }
       },
       vertexShader: `
         void main() {
@@ -50,23 +50,23 @@ const StarryBackground = () => {
           vec2 uv = (gl_FragCoord.xy - 0.5 * iResolution.xy) / min(iResolution.y, iResolution.x);
           vec3 finalColor = vec3(0.0);
           
-          // Layered stars for depth
           for(float i = 0.0; i < 4.0; i++) {
-            float size = i * 15.0 + 20.0;
+            float size = i * 10.0 + 10.0;
             vec2 p = uv * size;
             vec2 id = floor(p);
             vec2 f = fract(p) - 0.5;
             
             float r = hash(id);
-            if(r > 0.94) {
+            if(r > 0.6) { // HIGH FREQUENCY
               float d = length(f);
-              float star = 0.002 / (d * size * 0.1);
-              float twinkle = sin(iTime * (r * 2.0) + r * 10.0) * 0.5 + 0.5;
-              finalColor += star * twinkle * vec3(0.9, 0.9, 1.0);
+              // Make stars bigger/softer as requested by the image
+              float star = 0.005 / (d * size * 0.1); 
+              float twinkle = sin(iTime * (r * 3.0) + r * 10.0) * 0.5 + 0.5;
+              finalColor += star * twinkle * vec3(1.0); // Pure white stars
             }
           }
           
-          gl_FragColor = vec4(finalColor, finalColor.r);
+          gl_FragColor = vec4(finalColor, clamp(length(finalColor), 0.0, 1.0));
         }
       `,
       transparent: true,
@@ -78,15 +78,17 @@ const StarryBackground = () => {
 
     let frameId: number;
     const animate = () => {
-      material.uniforms.iTime.value += 0.01;
+      material.uniforms.iTime.value += 0.015;
       renderer.render(scene, camera);
       frameId = requestAnimationFrame(animate);
     };
     animate();
 
     const handleResize = () => {
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      material.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+      if (!container) return;
+      const { width, height } = container.getBoundingClientRect();
+      renderer.setSize(width, height);
+      material.uniforms.iResolution.value.set(width, height);
     };
     window.addEventListener('resize', handleResize);
 
@@ -100,22 +102,14 @@ const StarryBackground = () => {
       material.dispose();
       renderer.dispose();
     };
-  }, [showStars]);
+  }, []);
 
   return (
-    <AnimatePresence>
-      {showStars && (
-        <motion.div
-          key="stars"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 4, ease: "easeInOut" }}
-          className="fixed inset-0 pointer-events-none z-0"
-        >
-          <div ref={containerRef} className="w-full h-full" />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div 
+      ref={containerRef} 
+      className="fixed inset-0 pointer-events-none z-0 transition-opacity duration-1000"
+      style={{ opacity }}
+    />
   );
 };
 
