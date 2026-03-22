@@ -134,14 +134,7 @@ export function ChatInterface() {
                             "group flex flex-col gap-2 w-full",
                             msg.role === "user" ? "items-end" : "items-start"
                         )}>
-                            {msg.role === "assistant" && (
-                                <div className="flex items-center gap-3 mb-1">
-                                    <div className="w-6 h-6 rounded-full border border-neutral-800 flex items-center justify-center">
-                                         <Bot className="w-3.5 h-3.5 text-white" />
-                                    </div>
-                                    <span className="text-xs font-bold text-white uppercase tracking-wider">Hey Raghav 👋</span>
-                                </div>
-                            )}
+                            {/* Bot icon removed */}
                             <div className={cn(
                                 "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                                 msg.role === "user" 
