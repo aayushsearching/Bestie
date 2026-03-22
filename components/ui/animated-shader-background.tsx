@@ -1,20 +1,29 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Infinity, Rocket, Shield, Brain, Play, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const AnoAI = () => {
+const StarryBackground = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showStars, setShowStars] = useState(false);
 
   useEffect(() => {
+    const timer = setTimeout(() => setShowStars(true), 4500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!showStars) return;
+    
     const container = containerRef.current;
     if (!container) return;
 
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     container.appendChild(renderer.domElement);
 
     const material = new THREE.ShaderMaterial({
@@ -31,62 +40,36 @@ const AnoAI = () => {
         uniform float iTime;
         uniform vec2 iResolution;
 
-        #define NUM_OCTAVES 3
-
-        float rand(vec2 n) {
-          return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
-        }
-
-        float noise(vec2 p) {
-          vec2 ip = floor(p);
-          vec2 u = fract(p);
-          u = u*u*(3.0-2.0*u);
-
-          float res = mix(
-            mix(rand(ip), rand(ip + vec2(1.0, 0.0)), u.x),
-            mix(rand(ip + vec2(0.0, 1.0)), rand(ip + vec2(1.0, 1.0)), u.x), u.y);
-          return res * res;
-        }
-
-        float fbm(vec2 x) {
-          float v = 0.0;
-          float a = 0.3;
-          vec2 shift = vec2(100);
-          mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
-          for (int i = 0; i < NUM_OCTAVES; ++i) {
-            v += a * noise(x);
-            x = rot * x * 2.0 + shift;
-            a *= 0.4;
-          }
-          return v;
+        float hash(vec2 p) {
+          p = fract(p * vec2(123.34, 456.21));
+          p += dot(p, p + 45.32);
+          return fract(p.x * p.y);
         }
 
         void main() {
-          vec2 shake = vec2(sin(iTime * 1.2) * 0.005, cos(iTime * 2.1) * 0.005);
-          vec2 p = ((gl_FragCoord.xy + shake * iResolution.xy) - iResolution.xy * 0.5) / iResolution.y * mat2(6.0, -4.0, 4.0, 6.0);
-          vec2 v;
-          vec4 o = vec4(0.0);
-
-          float f = 2.0 + fbm(p + vec2(iTime * 5.0, 0.0)) * 0.5;
-
-          for (float i = 0.0; i < 35.0; i++) {
-            v = p + cos(i * i + (iTime + p.x * 0.08) * 0.025 + i * vec2(13.0, 11.0)) * 3.5 + vec2(sin(iTime * 3.0 + i) * 0.003, cos(iTime * 3.5 - i) * 0.003);
-            float tailNoise = fbm(v + vec2(iTime * 0.5, i)) * 0.3 * (1.0 - (i / 35.0));
-            vec4 auroraColors = vec4(
-              0.1 + 0.3 * sin(i * 0.2 + iTime * 0.4),
-              0.3 + 0.5 * cos(i * 0.3 + iTime * 0.5),
-              0.7 + 0.3 * sin(i * 0.4 + iTime * 0.3),
-              1.0
-            );
-            vec4 currentContribution = auroraColors * exp(sin(i * i + iTime * 0.8)) / length(max(v, vec2(v.x * f * 0.015, v.y * 1.5)));
-            float thinnessFactor = smoothstep(0.0, 1.0, i / 35.0) * 0.6;
-            o += currentContribution * (1.0 + tailNoise * 0.8) * thinnessFactor;
+          vec2 uv = (gl_FragCoord.xy - 0.5 * iResolution.xy) / min(iResolution.y, iResolution.x);
+          vec3 finalColor = vec3(0.0);
+          
+          // Layered stars for depth
+          for(float i = 0.0; i < 4.0; i++) {
+            float size = i * 15.0 + 20.0;
+            vec2 p = uv * size;
+            vec2 id = floor(p);
+            vec2 f = fract(p) - 0.5;
+            
+            float r = hash(id);
+            if(r > 0.94) {
+              float d = length(f);
+              float star = 0.002 / (d * size * 0.1);
+              float twinkle = sin(iTime * (r * 2.0) + r * 10.0) * 0.5 + 0.5;
+              finalColor += star * twinkle * vec3(0.9, 0.9, 1.0);
+            }
           }
-
-          o = tanh(pow(o / 100.0, vec4(1.6)));
-          gl_FragColor = o * 1.5;
+          
+          gl_FragColor = vec4(finalColor, finalColor.r);
         }
-      `
+      `,
+      transparent: true,
     });
 
     const geometry = new THREE.PlaneGeometry(2, 2);
@@ -95,7 +78,7 @@ const AnoAI = () => {
 
     let frameId: number;
     const animate = () => {
-      material.uniforms.iTime.value += 0.016;
+      material.uniforms.iTime.value += 0.01;
       renderer.render(scene, camera);
       frameId = requestAnimationFrame(animate);
     };
@@ -117,13 +100,23 @@ const AnoAI = () => {
       material.dispose();
       renderer.dispose();
     };
-  }, []);
+  }, [showStars]);
 
   return (
-    <div ref={containerRef} className="fixed inset-0 pointer-events-none overflow-x-hidden">
-      <div className="relative z-10 divider" />
-    </div>
+    <AnimatePresence>
+      {showStars && (
+        <motion.div
+          key="stars"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 4, ease: "easeInOut" }}
+          className="fixed inset-0 pointer-events-none z-0"
+        >
+          <div ref={containerRef} className="w-full h-full" />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
-export default AnoAI;
+export default StarryBackground;

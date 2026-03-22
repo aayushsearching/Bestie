@@ -60,7 +60,7 @@ export function ChatInterface({ onFirstMessage }: { onFirstMessage?: (text: stri
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "I'm Raghav's AI assistant. I've switched to the chat view as you requested. The input is now at the bottom, just like ChatGPT!",
+        content: "I'm Bestie's AI assistant. I've switched to the chat view as you requested. The input is now at the bottom, just like ChatGPT!",
       };
       setMessages((prev) => [...prev, aiMsg]);
       setIsLoading(false);
@@ -177,7 +177,7 @@ export function ChatInterface({ onFirstMessage }: { onFirstMessage?: (text: stri
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                            placeholder="Message Raghav AI..."
+                            placeholder="Message Bestie AI..."
                             className="flex-1 bg-transparent border-none py-3 text-white placeholder:text-neutral-500 focus:outline-none text-sm"
                         />
                         <div className="flex items-center gap-2">

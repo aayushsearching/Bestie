@@ -66,23 +66,25 @@ export function ChatSidebar({ isCollapsed, onToggle, onNewChat, chats = [] }: Ch
     )}>
       {/* Header */}
       <div className={cn("p-4 pb-2 flex items-center", isCollapsed ? "justify-center" : "justify-between")}>
-        <div className={cn("flex items-center justify-center")}>
-             {/* Replace Logo with Text Raghav / R */}
-             {isCollapsed ? (
-               <div className="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center border border-neutral-700">
-                  <span className="text-sm font-black text-white">R</span>
-               </div>
-             ) : (
-               <span className="text-2xl font-black tracking-tighter text-white">Raghav</span>
-             )}
-        </div>
-        {!isCollapsed && (
+        {isCollapsed ? (
           <button 
             onClick={onToggle}
-            className="p-2 text-neutral-400 hover:bg-neutral-900 rounded-lg transition-colors ml-auto"
+            className="p-2 text-neutral-400 hover:bg-neutral-800 rounded-lg transition-colors"
           >
-            <PanelLeft className="w-5 h-5" />
+            <PanelLeft className="w-5 h-5 text-white" />
           </button>
+        ) : (
+          <>
+            <div className="flex items-center">
+              <span className="text-2xl font-black tracking-tighter text-white">Bestie</span>
+            </div>
+            <button 
+              onClick={onToggle}
+              className="p-2 text-neutral-400 hover:bg-neutral-900 rounded-lg transition-colors ml-auto"
+            >
+              <PanelLeft className="w-5 h-5" />
+            </button>
+          </>
         )}
       </div>
 
@@ -113,19 +115,6 @@ export function ChatSidebar({ isCollapsed, onToggle, onNewChat, chats = [] }: Ch
         </div>
       </div>
 
-      {/* Footer / Toggle Section */}
-
-      {/* Minimized Toggle (bottom) */}
-      {isCollapsed && (
-        <div className="p-3 pb-4 flex justify-center border-t border-neutral-900 mt-2">
-            <button 
-              onClick={onToggle}
-              className="p-2 text-neutral-400 hover:bg-neutral-900 rounded-lg transition-colors"
-            >
-              <PanelLeft className="w-5 h-5" />
-            </button>
-        </div>
-      )}
     </div>
   );
 }
