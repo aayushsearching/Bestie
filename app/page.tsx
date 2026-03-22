@@ -1,25 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { VercelV0Chat } from "@/components/ui/v0-ai-chat";
+import { ChatInterface } from "@/components/chat-interface";
 import AnoAI from "@/components/ui/animated-shader-background";
 import { ChatSidebar } from "@/components/ui/sidebar";
-import { PanelLeft } from "lucide-react";
 
 export default function Home() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="flex bg-black text-white min-h-screen">
+    <div className="flex bg-black text-white min-h-screen font-sans selection:bg-white/20">
       {/* Left Sidebar */}
       <ChatSidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
 
       {/* Main Content */}
-      <main className="relative flex-1 flex flex-col items-center justify-center p-24 overflow-hidden">
-        <AnoAI />
+      <main className="relative flex-1 flex flex-col items-center justify-center p-4 lg:p-12 overflow-hidden bg-[#0d0d0d]">
+        {/* Transparent Shader Background */}
+        <div className="absolute inset-0 pointer-events-none opacity-40">
+           <AnoAI />
+        </div>
         
-        <div className="relative z-10 w-full max-w-4xl">
-          <VercelV0Chat />
+        {/* Integrated Chat Interface (Landing -> Chatting) */}
+        <div className="relative z-10 w-full h-full flex items-center justify-center">
+             <ChatInterface />
         </div>
       </main>
     </div>
