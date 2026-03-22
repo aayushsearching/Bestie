@@ -124,17 +124,7 @@ export function ChatInterface() {
             animate={{ opacity: 1 }}
             className="w-full h-full flex flex-col max-w-4xl mx-auto"
           >
-            {/* Header Area (Optional) */}
-            <div className="flex items-center justify-between p-4 sticky top-0 z-20 bg-black/50 backdrop-blur-md">
-                 <div className="flex items-center gap-2 group cursor-pointer">
-                    <span className="text-sm font-semibold text-neutral-300 group-hover:text-white transition-colors">Raghay AI</span>
-                    <Bot className="w-4 h-4 text-neutral-500" />
-                 </div>
-                 <div className="flex items-center gap-4">
-                    <Share2 className="w-4 h-4 text-neutral-500 hover:text-white cursor-pointer" />
-                    <MoreHorizontal className="w-4 h-4 text-neutral-500 hover:text-white cursor-pointer" />
-                 </div>
-            </div>
+            {/* Header Area Removed */}
 
             {/* Message Area with Translucent Background */}
             <div className="flex-1 overflow-hidden relative mx-4 my-2 rounded-3xl bg-neutral-900/40 backdrop-blur-xl border border-neutral-800/50 shadow-2xl">
@@ -181,9 +171,9 @@ export function ChatInterface() {
                 </ChatMessageList>
             </div>
 
-            {/* Bottom Input Area */}
-            <div className="w-full max-w-3xl mx-auto p-4 pb-8">
-                <div className="relative bg-neutral-900/90 border border-neutral-800 rounded-2xl p-2 transition-all focus-within:border-neutral-700 shadow-xl">
+            {/* Bottom Input Area aligned with Chat Box */}
+            <div className="w-full max-w-4xl mx-auto px-4 pb-4">
+                <div className="relative bg-neutral-900/60 backdrop-blur-xl border border-neutral-800 rounded-2xl p-2 transition-all focus-within:border-neutral-700 shadow-xl">
                     <div className="flex items-center gap-3 px-3">
                         <Plus className="w-4 h-4 text-neutral-500" />
                         <input
