@@ -31,7 +31,7 @@ interface Message {
   content: string;
 }
 
-export function ChatInterface() {
+export function ChatInterface({ onFirstMessage }: { onFirstMessage?: (text: string) => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +40,10 @@ export function ChatInterface() {
   const handleSend = (text?: string) => {
     const messageText = text || input;
     if (!messageText.trim()) return;
+
+    if (messages.length === 0) {
+      onFirstMessage?.(messageText);
+    }
 
     const userMsg: Message = {
       id: Date.now().toString(),

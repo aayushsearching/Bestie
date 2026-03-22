@@ -46,15 +46,19 @@ function SidebarItem({ icon, label, active, isCollapsed, onClick }: SidebarItemP
   );
 }
 
-const CHATS: string[] = [];
+interface ChatHistory {
+  id: string;
+  title: string;
+}
 
 interface ChatSidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
   onNewChat?: () => void;
+  chats?: ChatHistory[];
 }
 
-export function ChatSidebar({ isCollapsed, onToggle, onNewChat }: ChatSidebarProps) {
+export function ChatSidebar({ isCollapsed, onToggle, onNewChat, chats = [] }: ChatSidebarProps) {
   return (
     <div className={cn(
       "flex flex-col h-screen bg-[#0d0d0d] border-r border-neutral-800 transition-all duration-300 overflow-hidden",
@@ -94,14 +98,14 @@ export function ChatSidebar({ isCollapsed, onToggle, onNewChat }: ChatSidebarPro
             </p>
           )}
           <div className="space-y-1 pb-4 text-neutral-600 text-[10px] px-3">
-             {!isCollapsed && CHATS.length === 0 && (
+             {!isCollapsed && chats.length === 0 && (
                 <span>No saved chats yet</span>
              )}
-            {CHATS.map((chat) => (
+            {chats.map((chat: ChatHistory) => (
               <SidebarItem 
-                key={chat} 
+                key={chat.id} 
                 isCollapsed={isCollapsed} 
-                label={chat} 
+                label={chat.title} 
                 icon={isCollapsed ? <MessageSquare className="w-5 h-5" /> : null} 
               />
             ))}
