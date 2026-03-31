@@ -24,6 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from "@/components/ui/chat-bubble";
 import { ChatMessageList } from "@/components/ui/chat-message-list";
+import { processChat } from "@/lib/ai-actions";
 
 interface Message {
   id: string;
@@ -54,7 +55,7 @@ export function ChatInterface({
     onMessagesUpdate?.(newMsgs);
   };
 
-  const handleSend = (text?: string) => {
+  const handleSend = async (text?: string) => {
     const messageText = text || input;
     if (!messageText.trim()) return;
 
@@ -69,16 +70,30 @@ export function ChatInterface({
     setInput("");
     setIsLoading(true);
 
-    // Mock AI Response
-    setTimeout(() => {
+    try {
+      // Create chat history for the server action (excluding current message)
+      const history = messages.map(({ role, content }) => ({ role, content }));
+      
+      const response = await processChat(messageText, history);
+      
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "I'm Bestie's AI assistant. I've switched to the chat view as you requested. The input is now at the bottom, just like ChatGPT!",
+        content: response.content,
       };
+      
       updateMessages([...nextMsgs, aiMsg]);
+    } catch (error) {
+      console.error("Failed to get AI response:", error);
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Oops! My brain is a bit fuzzy right now. Can we try that again?",
+      };
+      updateMessages([...nextMsgs, errorMsg]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const ActionButton = ({ icon, label, text }: { icon: React.ReactNode; label: string; text: string }) => (
