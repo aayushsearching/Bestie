@@ -205,9 +205,7 @@ export function ChatInterface({
                         </div>
                     </div>
                 </div>
-                <p className="text-[10px] text-neutral-600 text-center mt-3">
-                    ChatGPT can make mistakes. Check important info.
-                </p>
+
             </div>
           </motion.div>
         )}
