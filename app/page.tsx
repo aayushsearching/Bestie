@@ -22,13 +22,18 @@ export default function Home() {
   const [activeChatId, setActiveChatId] = useState<string>(Date.now().toString());
   const [chats, setChats] = useState<ChatHistory[]>([]);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
+  const [memory, setMemory] = useState<string>("");
 
   // 1. Load from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem("bestie-chats");
-    if (saved) {
+    const savedChats = localStorage.getItem("bestie-chats");
+    const savedMemory = localStorage.getItem("bestie-memory");
+    
+    if (savedMemory) setMemory(savedMemory);
+    
+    if (savedChats) {
       try {
-        const parsed = JSON.parse(saved);
+        const parsed = JSON.parse(savedChats);
         setChats(parsed);
         // Load the most recent chat by default
         if (parsed.length > 0) {
@@ -40,6 +45,11 @@ export default function Home() {
       }
     }
   }, []);
+
+  const handleUpdateMemory = (newMemory: string) => {
+    setMemory(newMemory);
+    localStorage.setItem("bestie-memory", newMemory);
+  };
 
   // 2. Auto-save current messages to history when they change
   useEffect(() => {
@@ -88,6 +98,8 @@ export default function Home() {
         onSelectChat={handleSelectChat}
         chats={chats}
         activeChatId={activeChatId}
+        memory={memory}
+        onMemoryChange={handleUpdateMemory}
       />
 
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-4 lg:p-12 bg-[#0d0d0d]/40 h-full overflow-hidden backdrop-blur-[1px]">
@@ -96,6 +108,7 @@ export default function Home() {
                key={activeChatId} 
                initialMessages={currentMessages}
                onMessagesUpdate={setCurrentMessages}
+               memory={memory}
              />
         </div>
       </main>

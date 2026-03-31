@@ -34,10 +34,12 @@ interface Message {
 
 export function ChatInterface({ 
   initialMessages = [], 
-  onMessagesUpdate 
+  onMessagesUpdate,
+  memory = ""
 }: { 
   initialMessages?: Message[],
-  onMessagesUpdate?: (messages: Message[]) => void 
+  onMessagesUpdate?: (messages: Message[]) => void,
+  memory?: string
 }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
@@ -73,9 +75,6 @@ export function ChatInterface({
     try {
       // Create chat history for the server action (excluding current message)
       const history = messages.map(({ role, content }) => ({ role, content }));
-      
-      // Load long-term user memory from localStorage
-      const memory = localStorage.getItem("bestie-memory") || "";
       
       const response = await processChat(messageText, history, memory);
       

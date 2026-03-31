@@ -58,6 +58,8 @@ interface ChatSidebarProps {
   onSelectChat?: (id: string) => void;
   chats?: ChatHistory[];
   activeChatId?: string;
+  memory: string;
+  onMemoryChange: (val: string) => void;
 }
 
 export function ChatSidebar({ 
@@ -66,7 +68,9 @@ export function ChatSidebar({
   onNewChat, 
   onSelectChat, 
   chats = [], 
-  activeChatId 
+  activeChatId,
+  memory,
+  onMemoryChange
 }: ChatSidebarProps) {
   return (
     <div className={cn(
@@ -108,7 +112,7 @@ export function ChatSidebar({
               Your chats
             </p>
           )}
-          <div className="space-y-1 pb-4 text-neutral-600 text-[10px] px-3">
+          <div className="space-y-1 pb-4 text-neutral-600 text-[10px] px-3 font-medium">
              {!isCollapsed && chats.length === 0 && (
                 <span>No saved chats yet</span>
              )}
@@ -126,6 +130,43 @@ export function ChatSidebar({
         </div>
       </div>
 
+      {/* Memory Section */}
+      <div className={cn("p-4 border-t border-neutral-800 bg-black/20", isCollapsed && "items-center flex flex-col")}>
+         {isCollapsed ? (
+            <div className="p-2 text-neutral-500 hover:text-white cursor-pointer group relative">
+                <Zap className="w-5 h-5" />
+                <div className="absolute left-full ml-2 px-2 py-1 bg-neutral-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+                    AI Memory
+                </div>
+            </div>
+         ) : (
+            <div className="space-y-3">
+                <div className="flex items-center gap-2 text-neutral-400">
+                    <Zap className="w-3 h-3 text-yellow-500" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">AI Memory</span>
+                </div>
+                <textarea 
+                    value={memory}
+                    onChange={(e) => onMemoryChange(e.target.value)}
+                    placeholder="Tell your Bestie things to remember about you..."
+                    className="w-full bg-neutral-900/50 border border-neutral-800 rounded-lg p-2 text-xs text-neutral-300 placeholder:text-neutral-600 focus:outline-none focus:border-neutral-700 min-h-[80px] resize-none"
+                />
+            </div>
+         )}
+         {!isCollapsed && (
+            <div className="mt-6 flex items-center gap-3 px-1">
+                <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center text-[10px] font-bold text-white border border-neutral-700">
+                    R
+                </div>
+                <div className="flex-1 overflow-hidden">
+                    <p className="text-xs font-semibold text-white truncate">Raghav</p>
+                    <p className="text-[10px] text-neutral-500 truncate">Free Plan</p>
+                </div>
+                <Settings className="w-4 h-4 text-neutral-500 hover:text-white cursor-pointer shrink-0" />
+            </div>
+         )}
+      </div>
     </div>
   );
 }
+
