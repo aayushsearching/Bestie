@@ -74,7 +74,10 @@ export function ChatInterface({
       // Create chat history for the server action (excluding current message)
       const history = messages.map(({ role, content }) => ({ role, content }));
       
-      const response = await processChat(messageText, history);
+      // Load long-term user memory from localStorage
+      const memory = localStorage.getItem("bestie-memory") || "";
+      
+      const response = await processChat(messageText, history, memory);
       
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),

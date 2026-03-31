@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChatInterface } from "@/components/chat-interface";
 import StarryBackground from "@/components/ui/animated-shader-background";
 import { ChatSidebar } from "@/components/ui/sidebar";
@@ -23,29 +23,53 @@ export default function Home() {
   const [chats, setChats] = useState<ChatHistory[]>([]);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
 
-  const saveCurrentToHistory = () => {
+  // 1. Load from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("bestie-chats");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setChats(parsed);
+        // Load the most recent chat by default
+        if (parsed.length > 0) {
+          setActiveChatId(parsed[0].id);
+          setCurrentMessages(parsed[0].messages);
+        }
+      } catch (e) {
+        console.error("Failed to load history", e);
+      }
+    }
+  }, []);
+
+  // 2. Auto-save current messages to history when they change
+  useEffect(() => {
     if (currentMessages.length > 0) {
       setChats(prev => {
         const existingIdx = prev.findIndex(c => c.id === activeChatId);
+        let updated = [...prev];
+        
         if (existingIdx > -1) {
-          const updated = [...prev];
+          // Update existing chat messages but keep its position
           updated[existingIdx] = { ...updated[existingIdx], messages: currentMessages };
-          return updated;
+        } else {
+          // Add new chat to the top
+          const title = currentMessages[0].content.slice(0, 40);
+          updated = [{ id: activeChatId, title, messages: currentMessages }, ...prev];
         }
-        const title = currentMessages[0].content.slice(0, 40);
-        return [{ id: activeChatId, title, messages: currentMessages }, ...prev];
+        
+        // Save the updated list to localStorage
+        localStorage.setItem("bestie-chats", JSON.stringify(updated));
+        return updated;
       });
     }
-  };
+  }, [currentMessages, activeChatId]);
 
   const handleNewChat = () => {
-    saveCurrentToHistory();
     setActiveChatId(Date.now().toString());
     setCurrentMessages([]);
   };
 
   const handleSelectChat = (id: string) => {
-    saveCurrentToHistory();
     const selected = chats.find(c => c.id === id);
     if (selected) {
       setActiveChatId(id);

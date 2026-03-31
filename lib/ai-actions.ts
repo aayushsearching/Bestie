@@ -42,34 +42,30 @@ async function getEmotion(text: string) {
   }
 }
 
-export async function processChat(input: string, history: Array<{ role: "user" | "assistant", content: string }>) {
+export async function processChat(input: string, history: Array<{ role: "user" | "assistant", content: string }>, memory?: string) {
   try {
     // 🚀 Step 1: Detect Emotion (LOCALLY via Transformers.js)
     const emotion = await getEmotion(input);
-    console.log("Detected User Mood:", emotion); // This helps you see if the model is working
+    console.log("Detected User Mood:", emotion);
 
     // 🚀 Step 2: Create empathetic response (LOCALLY via Ollama)
+    // We include 'memory' from previous sessions to give the AI long-term context
     const systemPrompt = `You are "Bestie", a close human friend who is deeply supportive.
     The user's current mood is: "${emotion}".
+    ${memory ? `FACTS YOU REMEMBER ABOUT USER: ${memory}` : ""}
     
     DIRECTIONS:
     1. MATCH THE VIBE: If they are sad or depressed, do NOT say "Woooow" or "Kya baat hai". Be quiet, supportive, and use soft words.
-    2. LANGUAGE MATCHING: 
-       - If the user talks in HINDI, you MUST respond in HINDI.
-       - If the user talks in ENGLISH, you MUST respond in ENGLISH.
-       - If the user uses HINGLISH, you MUST respond in HINGLISH.
-    3. SLANG RULES:
-       - POSITIVE MOOD: Use "Woooow", "Kya baat hai", "Cheer up yaar", "Maza aa gaya!".
-       - SAD/DEPRESSING MOOD: Use "Hm, I'm here for you bro", "Koi baat nahi yaar", "Main hoon na", "Dil chota mat kar".
-    4. BE ENGAGING: Always ask ONE follow-up question that is relevant, curious, or caring to keep the conversation going.
-    5. Keep it short (1-2 sentences). Speak like a friend over WhatsApp.
-    6. No AI-sounding advice unless asked.`;
+    2. LANGUAGE MATCHING: Respond in the same language the user uses (Hindi/English/Hinglish).
+    3. BE ENGAGING: Always ask ONE follow-up question.
+    4. LONG-TERM MEMORY: Use the "FACTS YOU REMEMBER" to make the user feel like you truly know them.
+    5. No AI-sounding advice. Just be a friend.`;
 
     const response = await ollama.chat({
-      model: "llama3", // Switch to "phi3" if you are running that in your terminal!
+      model: "llama3", 
       messages: [
         { role: "system", content: systemPrompt },
-        ...history.slice(-10),
+        ...history.slice(-20), // Increased context window for better short-term memory
         { role: "user", content: input }
       ],
       stream: false,
