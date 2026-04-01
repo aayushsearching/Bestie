@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from "@/components/ui/chat-bubble";
 import { ChatMessageList } from "@/components/ui/chat-message-list";
 import { processChat } from "@/lib/ai-actions";
+import { useSpeechRecognition } from "@/components/hooks/use-speech-recognition";
 
 interface Message {
   id: string;
@@ -47,6 +48,20 @@ export function ChatInterface({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
+  const { isListening, transcript, startListening, stopListening, hasSupport } = useSpeechRecognition();
+
+  // Sync transcription to input field
+  useEffect(() => {
+    if (transcript) {
+      setInput(transcript);
+    }
+  }, [transcript]);
+
+  const toggleListening = () => {
+    if (isListening) stopListening();
+    else startListening();
+  };
+
   const isLanding = messages.length === 0;
 
   // Sync with prop changes
@@ -143,7 +158,13 @@ export function ChatInterface({
                     className="flex-1 bg-transparent border-none py-4 text-white placeholder:text-neutral-500 focus:outline-none text-base"
                   />
                   <div className="flex items-center gap-2">
-                    <Mic className="w-5 h-5 text-neutral-500 hover:text-white cursor-pointer transition-colors" />
+                    <Mic 
+                    onClick={toggleListening}
+                    className={cn(
+                        "w-5 h-5 cursor-pointer transition-all",
+                        isListening ? "text-red-500 animate-pulse scale-110" : "text-neutral-500 hover:text-white"
+                    )} 
+                  />
                     <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center cursor-pointer hover:bg-neutral-200 transition-colors" onClick={() => handleSend()}>
                         <AudioLines className="w-4 h-4 text-black" />
                     </div>
@@ -219,7 +240,13 @@ export function ChatInterface({
                             className="flex-1 bg-transparent border-none py-3 text-white placeholder:text-neutral-500 focus:outline-none text-sm"
                         />
                         <div className="flex items-center gap-2">
-                            <Mic className="w-4 h-4 text-neutral-500" />
+                            <Mic 
+                            onClick={toggleListening}
+                            className={cn(
+                                "w-4 h-4 cursor-pointer transition-all",
+                                isListening ? "text-red-500 animate-pulse scale-110" : "text-neutral-500 hover:text-white"
+                            )} 
+                        />
                             <div className={cn(
                                 "w-8 h-8 rounded-full flex items-center justify-center transition-all",
                                 input.trim() ? "bg-white text-black" : "bg-neutral-800 text-neutral-500"
