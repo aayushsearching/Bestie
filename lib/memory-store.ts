@@ -1,39 +1,70 @@
+"use server";
+
 import fs from "fs/promises";
 import path from "path";
 
 const MEMORY_FILE = path.join(process.cwd(), "user_memory.json");
 
+interface MemoryEntry {
+  timestamp: string;
+  fact: string;
+}
+
 /**
- * Loads the user memory from the local file.
+ * Loads the user memory as a formatted timeline string.
  */
 export async function loadLocalMemory(): Promise<string> {
   try {
     const data = await fs.readFile(MEMORY_FILE, "utf-8");
     const json = JSON.parse(data);
-    return json.characteristics || "";
+    
+    // Support both old and new formats
+    const entries: MemoryEntry[] = Array.isArray(json.entries) ? json.entries : [];
+    
+    if (entries.length === 0 && json.characteristics) {
+        return json.characteristics;
+    }
+
+    return entries
+      .map(e => `[${e.timestamp}]: ${e.fact}`)
+      .join("\n");
   } catch (error) {
-    // If file doesn't exist, start with empty memory
     return "";
   }
 }
 
 /**
- * Saves/Appends new characteristics to the local file.
+ * Appends a new fact to the timeline in the local file.
  */
-export async function saveLocalMemory(newFacts: string) {
+export async function saveLocalMemory(newFact: string) {
   try {
-    const currentMemory = await loadLocalMemory();
+    let json = { entries: [] as MemoryEntry[] };
     
-    // We combine the current memory with new facts (you could also use an LLM to deduplicate later)
-    const updatedMemory = `${currentMemory}\n${newFacts}`.trim();
+    try {
+      const data = await fs.readFile(MEMORY_FILE, "utf-8");
+      const existing = JSON.parse(data);
+      if (Array.isArray(existing.entries)) {
+        json.entries = existing.entries;
+      }
+    } catch (e) {
+      // File doesn't exist yet, start fresh
+    }
+
+    const newEntry: MemoryEntry = {
+      timestamp: new Date().toLocaleString(),
+      fact: newFact.trim()
+    };
     
-    await fs.writeFile(MEMORY_FILE, JSON.stringify({ 
-      characteristics: updatedMemory,
-      lastUpdated: new Date().toISOString() 
-    }, null, 2));
+    json.entries.push(newEntry);
     
-    return updatedMemory;
+    // Keep only the last 50 important events to prevent prompt overflow
+    if (json.entries.length > 50) {
+      json.entries = json.entries.slice(-50);
+    }
+    
+    await fs.writeFile(MEMORY_FILE, JSON.stringify(json, null, 2));
+    return await loadLocalMemory();
   } catch (error) {
-    console.error("Failed to save local memory file:", error);
+    console.error("Failed to save to timeline memory:", error);
   }
 }

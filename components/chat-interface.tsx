@@ -48,9 +48,13 @@ export function ChatInterface({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
-  const { isListening, transcript, startListening, stopListening, hasSupport } = useSpeechRecognition();
+  const { isListening, transcript, startListening, stopListening, hasSupport } = useSpeechRecognition({
+    onFinalResult: (text: string) => {
+        handleSend(text);
+    }
+  });
 
-  // Sync transcription to input field
+  // Keep input field updated while speaking
   useEffect(() => {
     if (transcript) {
       setInput(transcript);
@@ -76,7 +80,8 @@ export function ChatInterface({
 
   const handleSend = async (text?: string) => {
     const messageText = text || input;
-    if (!messageText.trim()) return;
+    // 🔥 FIX: Prevent sending if another message is already being processed
+    if (!messageText.trim() || isLoading) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -159,14 +164,18 @@ export function ChatInterface({
                   />
                   <div className="flex items-center gap-2">
                     <Mic 
-                    onClick={toggleListening}
+                    onClick={!isLoading ? toggleListening : undefined}
                     className={cn(
                         "w-5 h-5 cursor-pointer transition-all",
-                        isListening ? "text-red-500 animate-pulse scale-110" : "text-neutral-500 hover:text-white"
+                        isListening ? "text-red-500 animate-pulse scale-110" : "text-neutral-500 hover:text-white",
+                        isLoading && "opacity-20 cursor-not-allowed pointer-events-none"
                     )} 
                   />
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center cursor-pointer hover:bg-neutral-200 transition-colors" onClick={() => handleSend()}>
-                        <AudioLines className="w-4 h-4 text-black" />
+                    <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                        isLoading ? "bg-neutral-800 cursor-not-allowed" : "bg-white hover:bg-neutral-200 cursor-pointer"
+                    )} onClick={() => !isLoading && handleSend()}>
+                        <AudioLines className={cn("w-4 h-4", isLoading ? "text-neutral-600" : "text-black")} />
                     </div>
                   </div>
                 </div>
@@ -241,16 +250,17 @@ export function ChatInterface({
                         />
                         <div className="flex items-center gap-2">
                             <Mic 
-                            onClick={toggleListening}
+                            onClick={!isLoading ? toggleListening : undefined}
                             className={cn(
                                 "w-4 h-4 cursor-pointer transition-all",
-                                isListening ? "text-red-500 animate-pulse scale-110" : "text-neutral-500 hover:text-white"
+                                isListening ? "text-red-500 animate-pulse scale-110" : "text-neutral-500 hover:text-white",
+                                isLoading && "opacity-20 cursor-not-allowed pointer-events-none"
                             )} 
                         />
                             <div className={cn(
                                 "w-8 h-8 rounded-full flex items-center justify-center transition-all",
-                                input.trim() ? "bg-white text-black" : "bg-neutral-800 text-neutral-500"
-                            )} onClick={() => handleSend()}>
+                                input.trim() && !isLoading ? "bg-white text-black cursor-pointer" : "bg-neutral-800 text-neutral-500 cursor-not-allowed"
+                            )} onClick={() => !isLoading && handleSend()}>
                                 <ArrowUp className="w-4 h-4" />
                             </div>
                         </div>
