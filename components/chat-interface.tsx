@@ -35,10 +35,12 @@ interface Message {
 export function ChatInterface({ 
   initialMessages = [], 
   onMessagesUpdate,
+  onMemoryUpdate,
   memory = ""
 }: { 
   initialMessages?: Message[],
   onMessagesUpdate?: (messages: Message[]) => void,
+  onMemoryUpdate?: (memory: string) => void,
   memory?: string
 }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -77,6 +79,11 @@ export function ChatInterface({
       const history = messages.map(({ role, content }) => ({ role, content }));
       
       const response = await processChat(messageText, history, memory);
+      
+      // Update our long-term memory widget if the AI learned something new
+      if (response.memory) {
+        onMemoryUpdate?.(response.memory);
+      }
       
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),

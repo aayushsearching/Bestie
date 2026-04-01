@@ -108,6 +108,7 @@ export default function Home() {
                key={activeChatId} 
                initialMessages={currentMessages}
                onMessagesUpdate={setCurrentMessages}
+               onMemoryUpdate={handleUpdateMemory}
                memory={memory}
              />
         </div>

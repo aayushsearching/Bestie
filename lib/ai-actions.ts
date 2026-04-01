@@ -2,6 +2,7 @@
 
 import { pipeline } from "@huggingface/transformers";
 import ollama from "ollama";
+import { loadLocalMemory, saveLocalMemory } from "./memory-store";
 
 // Cache for the local models to avoid reloading on every request
 let englishPipe: any = null;
@@ -42,44 +43,69 @@ async function getEmotion(text: string) {
   }
 }
 
-export async function processChat(input: string, history: Array<{ role: "user" | "assistant", content: string }>, memory?: string) {
+export async function processChat(input: string, history: Array<{ role: "user" | "assistant", content: string }>, manualMemory?: string) {
   try {
-    // 🚀 Step 1: Detect Emotion (LOCALLY via Transformers.js)
+    // 1. Load context memory from THE LOCAL FILE (and combine with any manual edits)
+    const fileMemory = await loadLocalMemory();
+    const fullMemory = [fileMemory, manualMemory].filter(Boolean).join("\n");
+    
+    // 2. Detect Emotion
     const emotion = await getEmotion(input);
-    console.log("Detected User Mood:", emotion);
+    console.log("Detected Mood:", emotion);
 
-    // 🚀 Step 2: Create empathetic response (LOCALLY via Ollama)
-    // We include 'memory' from previous sessions to give the AI long-term context
-    const systemPrompt = `You are "Bestie", a close human friend who is deeply supportive.
-    The user's current mood is: "${emotion}".
-    ${memory ? `FACTS YOU REMEMBER ABOUT USER: ${memory}` : ""}
+    // 3. AI Generation + Extraction logic
+    const systemPrompt = `You are "Bestie", a deeply empathetic local AI friend. 
+    CURRENT MOOD: "${emotion}".
+    THINGS YOU REMEMBER ABOUT USER: 
+    ---
+    ${fullMemory}
+    ---
     
     DIRECTIONS:
-    1. MATCH THE VIBE: If they are sad or depressed, do NOT say "Woooow" or "Kya baat hai". Be quiet, supportive, and use soft words.
-    2. LANGUAGE MATCHING: Respond in the same language the user uses (Hindi/English/Hinglish).
-    3. BE ENGAGING: Always ask ONE follow-up question.
-    4. LONG-TERM MEMORY: Use the "FACTS YOU REMEMBER" to make the user feel like you truly know them.
-    5. No AI-sounding advice. Just be a friend.`;
+    1. MATCH THE VIBE: Match your language (Hindi/English) and mood to the user. 
+    2. BE COMPACT: Keep chats 1-2 lines. Always ask a caring follow up question.
+    3. LEARN & REMEMBER: If you learn something NEW about the user (their name, likes, job, important event, personality), save it.
+
+    OUTPUT FORMAT:
+    [RESPONSE] Your message to the user.
+    [NEW_MEMORIES] (Optional: Only if you learned a new fact about the user. List them in 1 line. Else leave empty.)`;
 
     const response = await ollama.chat({
-      model: "llama3", 
+      model: "llama3", // Switch to phi3 if needed
       messages: [
         { role: "system", content: systemPrompt },
-        ...history.slice(-20), // Increased context window for better short-term memory
+        ...history.slice(-20),
         { role: "user", content: input }
       ],
       stream: false,
     });
 
+    const output = response.message.content;
+    
+    // 4. Parse the AI's output
+    let responseText = output.replace(/\[RESPONSE\]/i, "").split("[NEW_MEMORIES]")[0].trim();
+    const learnedMatch = output.match(/\[NEW_MEMORIES\]([\s\S]*)/i);
+    const newFacts = learnedMatch ? learnedMatch[1].trim() : "";
+
+    // 5. AUTO-SAVE TO LOCAL FILE if new facts are found
+    if (newFacts && newFacts.length > 3) {
+      await saveLocalMemory(newFacts);
+      console.log("✨ Bestie just learned something new:", newFacts);
+    }
+    
+    const updatedFullMemory = await loadLocalMemory();
+
     return {
-      content: response.message.content,
-      emotion: emotion
+      content: responseText,
+      emotion: emotion,
+      memory: updatedFullMemory
     };
   } catch (error) {
     console.error("AI Error:", error);
     return {
-      content: "Wait, my brain is taking a break! Check if Ollama is running ('ollama run llama3') and that you have an internet connection for the FIRST download of the emotion models.",
-      emotion: "confused"
+      content: "Wait, my brain is taking a break!",
+      emotion: "confused",
+      memory: ""
     };
   }
 }
